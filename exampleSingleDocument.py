@@ -10,5 +10,4 @@ my_doC = doC(model=os.path.join(".","models","model_1.h5"))
 folder = os.path.join(".","image_example","PRC")
 
 for my_file in os.listdir(folder):
-    #print(my_doC.predict(input_file="./103433_85_PRC.pdf"))
     print(my_doC.predict(input_file=os.path.join(folder,my_file)))

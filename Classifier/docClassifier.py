@@ -13,6 +13,7 @@ import cv2
 from wand.image import Image as wi
 from wand.api import library
 import ctypes
+import time
 # Tell wand about C-API method
 library.MagickNextImage.argtypes = [ctypes.c_void_p]
 library.MagickNextImage.restype = ctypes.c_int
@@ -51,12 +52,13 @@ class docClassifier(object):
             lenght = len(pdf.sequence)
             pdfimage = pdf.convert("jpg")
             img = wi(image=pdfimage)
-            img.save(filename=input_file+".jpg")
+            unique_code = time.time()
+            img.save(filename=os.path.join(".","tmp_file")+str(unique_code)+".jpg")
     
         if lenght > 1:
-            img = cv2.imread(input_file+"-0.jpg")
+            img = cv2.imread(os.path.join(".","tmp_file")+str(unique_code)+"-0.jpg")
         else:
-            img = cv2.imread(input_file+".jpg")
+            img = cv2.imread(os.path.join(".","tmp_file")+str(unique_code)+".jpg")
         x = cv2.resize(img, (800, 800))
         x = image.img_to_array(x)
         x = np.expand_dims(x, axis=0)
@@ -113,8 +115,8 @@ class docClassifier(object):
         #Removing images
         if lenght > 1:
             for i in range(lenght):
-                os.remove(input_file+"-"+str(i)+".jpg")
+                os.remove(os.path.join(".","tmp_file")+str(unique_code)+"-"+str(i)+".jpg")
         else:
-            os.remove(input_file+".jpg")
+            os.remove(os.path.join(".","tmp_file")+str(unique_code)+".jpg")
         
         return to_be_returned
