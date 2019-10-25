@@ -30,13 +30,13 @@ class docClassifier(object):
         - configuration for pytesseract
         - CNN model
         - angles of rotation
-        WARNING: IMPORTANT PARAMETERS, MODIFYING THEM CAN BREAK THE PROGRAM
         @param model: path of the model (example: "./model_1.h5")
         '''
         self.config = ('-l eng --oem 1 --psm 3')
-        self.PRC = ["REVISIONE", "CONTROLLO", "CHECK", "PLAN", "PIANO", "MANUFACTORING"]
-        self.FR = ["FAULT", "REPORT", "AULT", "FAUL", "EPORT", "REPOR"]
-        self.CF = ["DISTINTA", "MATRICOLE", "ISTINTA", "DISTINT", "ATRICOLE", "MATRICOL"]
+        self.PRC = ["WORDS"]
+        self.FR = ["WORDS"]
+        self.ST = ["WORDS"]
+        self.CF = ["WORDS"]
         self.model = tf.keras.models.load_model(model)
         self.angles = [0, 180, 90, -90]
         
@@ -74,12 +74,13 @@ class docClassifier(object):
         cont_prc = 0  #Used to lower the probability of incorrect classifications
         cont_fr = 0
         cont_cf = 0
+        cont_st = 0
         already_found = []
         to_be_returned = ""
         for word in text.split(' '):
             type_int = 0  #Type_int keeps track of document type
             if flag == 0:
-                for type_doc in [self.PRC, self.FR, self.CF]:
+                for type_doc in [self.PRC, self.FR, self.CF, self.ST]:
                     for word_dict in type_doc:
                         if word.find(word_dict) > -1 and flag == 0 and word_dict not in already_found:
                 
@@ -89,6 +90,8 @@ class docClassifier(object):
                                 cont_fr += 1
                             elif type_int == 2:
                                 cont_cf += 1
+                            elif type_int == 3:
+                                cont_st += 1
                             
                             if cont_prc > 1:
                                 to_be_returned = "PRC"
@@ -102,6 +105,10 @@ class docClassifier(object):
                                 to_be_returned = "CF"
                                 flag = 1
                                 break
+                            elif cont_st > 1:
+                                to_be_returned = "ST"
+                                flag = 1
+                                break
                             
                             already_found.append(word_dict)
                         
@@ -109,8 +116,6 @@ class docClassifier(object):
                 
                 if flag == 1:
                     break
-        if flag == 0:  #Checking for ST folder
-            to_be_returned = "ST"
 
         #Removing images
         if lenght > 1:
